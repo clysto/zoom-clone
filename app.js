@@ -8,6 +8,10 @@ const io = require('socket.io')(http);
 
 const PORT = process.env['PORT'];
 
+const authRoute = require('./routes/auth.route');
+
+require('./auth/config');
+
 // 连接数据库
 mongoose.connect(process.env['DB_URL'], {
   useNewUrlParser: true,
@@ -27,4 +31,7 @@ const peerServer = ExpressPeerServer(server, {
   path: '/app',
 });
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 app.use('/peerjs', peerServer);
+app.use(authRoute);
