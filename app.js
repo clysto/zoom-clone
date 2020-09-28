@@ -3,8 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { ExpressPeerServer } = require('peer');
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const server = require('http').createServer(app);
+const SocketServer = require('./io');
 
 const PORT = process.env['PORT'];
 
@@ -21,17 +21,18 @@ mongoose.connect(process.env['DB_URL'], {
   pass: process.env['DB_PWD'],
 });
 
-// 启动HTTP服务
-const server = app.listen(PORT, () => {
-  console.log(`Listening on http://localhost:${PORT}`);
-});
-
 // 挂载peerjs服务
 const peerServer = ExpressPeerServer(server, {
   path: '/app',
 });
+SocketServer(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/peerjs', peerServer);
 app.use(authRoute);
+
+// 启动HTTP服务
+server.listen(PORT, () => {
+  console.log(`Listening on http://localhost:${PORT}`);
+});
