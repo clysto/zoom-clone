@@ -4,7 +4,10 @@ Web:
     ✔ 搭建用户系统 @done(20-09-27 23:08)
     ✔ 编写权限认证中间件 @done(20-09-27 23:08)
 SocketIO:
-    ☐ 搭建基础SocketIO服务器
-    ☐ 解决Socket权限验证问题
+    ✔ 搭建基础SocketIO服务器 @done(20-09-28 14:11)
+    ✔ 解决Socket权限验证问题 @done(20-09-28 16:30)
     ☐ 搭建房间系统
+    ☐ 构建session系统
+RTC:
+    ☐ 七牛云RTC签发token服务
     
