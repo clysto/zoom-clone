@@ -6,4 +6,6 @@ router.get('/rooms', auth, (req, res) => {
   
 });
 
+
+
 module.exports = router;

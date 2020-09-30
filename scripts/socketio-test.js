@@ -23,6 +23,7 @@ fetch(`${BASE_URL}/login`, {
     });
 
     socket.on('connect', () => {
-      socket.emit(JOIN_ROOM, { roomId: '5f719e4d6377331b7534b2be' });
+      // socket.emit(JOIN_ROOM, { roomId: '5f719e4d6377331b7534b2be' });
+      socket.emit(CREATE_ROOM, { subject: '你好世界2' });
     });
   });

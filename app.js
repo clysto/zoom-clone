@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const { ExpressPeerServer } = require('peer');
 const app = express();
 const server = require('http').createServer(app);
 const SocketServer = require('./io');
@@ -21,15 +20,10 @@ mongoose.connect(process.env['DB_URL'], {
   pass: process.env['DB_PWD'],
 });
 
-// 挂载peerjs服务
-const peerServer = ExpressPeerServer(server, {
-  path: '/app',
-});
 SocketServer(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use('/peerjs', peerServer);
 app.use(authRoute);
 
 // 启动HTTP服务

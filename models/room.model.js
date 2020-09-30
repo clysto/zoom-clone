@@ -4,8 +4,9 @@ const Room = mongoose.model(
   'Room',
   new mongoose.Schema({
     subject: String,
-    closed: Boolean,
+    expireAt: Date,
     creator: mongoose.ObjectId,
+    token: String,
   })
 );
 
