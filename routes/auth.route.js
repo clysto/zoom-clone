@@ -15,16 +15,20 @@ router.post(
       return res.status(400).json({ errors: errors.mapped()});
     }
     const { username, password} = req.body;
-    var insertInfo = {"username" : username, "password" : password};
+    const insertInfo = {"username" : username, "password" : password};
 
     User.findOne({ username }, (err, user) =>{
       if (err) throw err;
       if (user === null ) {
-        User.create(insertInfo);
-        res.json("注册成功");
+        //User.create(insertInfo);
+        const userSign = new User();
+        userSign.username = insertInfo.username;
+        userSign.password = insertInfo.password;
+        userSign.save();
+        res.status(201).json("注册成功");
       }
       else {
-        res.status(401).json({error : "用户已存在"});
+        res.status(403).json({error : "用户已存在"});
       }
     });
   });
