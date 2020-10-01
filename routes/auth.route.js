@@ -7,6 +7,29 @@ const auth = require('../middlewares/auth.midddleware');
 const JWT_SECRET = process.env['JWT_SECRET'];
 
 router.post(
+  '/signin',
+  [body('username').notEmpty(), body('password').notEmpty()],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.mapped()});
+    }
+    const { username, password} = req.body;
+    var insertInfo = {"username" : username, "password" : password};
+
+    User.findOne({ username }, (err, user) =>{
+      if (err) throw err;
+      if (user === null ) {
+        User.create(insertInfo);
+        res.json("注册成功");
+      }
+      else {
+        res.status(401).json({error : "用户已存在"});
+      }
+    });
+  });
+
+router.post(
   '/login',
   [body('username').notEmpty(), body('password').notEmpty()],
   (req, res) => {
