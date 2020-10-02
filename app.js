@@ -8,6 +8,7 @@ const SocketServer = require('./io');
 const PORT = process.env['PORT'];
 
 const authRoute = require('./routes/auth.route');
+const roomRoute = require('./routes/room.route');
 
 require('./auth/config');
 
@@ -25,6 +26,7 @@ SocketServer(server);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(authRoute);
+app.use(roomRoute);
 
 // 启动HTTP服务
 server.listen(PORT, () => {

@@ -40,7 +40,6 @@ router.post(
 );
 
 router.get('/user', auth, (req, res) => {
-  console.log(req.user);
   res.send(req.user);
 });
 
