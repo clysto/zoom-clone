@@ -6,7 +6,7 @@ const Room = mongoose.model(
     subject: String,
     expireAt: Date,
     creator: mongoose.ObjectId,
-    token: String,
+    createdDate: Date,
   })
 );
 

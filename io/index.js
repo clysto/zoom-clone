@@ -1,8 +1,6 @@
 const io = require('socket.io');
 const { JOIN_ROOM, CREATE_ROOM } = require('./events');
 const jwt = require('jsonwebtoken');
-const Room = require('../models/room.model');
-const { genRoomToken } = require('../qiniu/rtc');
 
 const JWT_SECRET = process.env['JWT_SECRET'];
 
@@ -29,16 +27,6 @@ function SocketServer(httpServer, opts) {
   server.on('connection', (socket) => {
     socket.on(JOIN_ROOM, (data) => {
       socket.join(data.roomId);
-    });
-
-    socket.on(CREATE_ROOM, (data) => {
-      const room = new Room();
-      room.creator = socket.user.id;
-      room.subject = data.subject;
-      room.closed = false;
-      const expiredAt = new Date(Date.now() + 10 * 3600 * 24 * 1000);
-      room.token = genRoomToken(room._id.toString(), socket.user.id, expiredAt);
-      room.save();
     });
   });
 }
