@@ -3,29 +3,35 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user.model');
 const { body, validationResult } = require('express-validator');
 const auth = require('../middlewares/auth.midddleware');
+const bcrypt = require('bcrypt');
 
 const JWT_SECRET = process.env['JWT_SECRET'];
+const SALT_ROUNDS = parseInt(process.env['BCRYPT_SALT_ROUNDS']);
 
 router.post(
-  '/signin',
-  [body('username').notEmpty(), body('password').notEmpty()],
+  '/signup',
+  [
+    body('username', '用户名不合法').matches(/^[a-zA-Z_\-]+$/),
+    body('password').notEmpty(),
+  ],
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.mapped() });
     }
     const { username, password } = req.body;
-    const insertInfo = { username: username, password: password };
 
     User.findOne({ username }, (err, user) => {
       if (err) throw err;
       if (user === null) {
-        //User.create(insertInfo);
         const userSign = new User();
-        userSign.username = insertInfo.username;
-        userSign.password = insertInfo.password;
-        userSign.save();
-        res.status(201).json('注册成功');
+        userSign.username = username;
+        bcrypt.hash(password, SALT_ROUNDS, function (err, hash) {
+          if (err) throw err;
+          userSign.password = hash;
+          userSign.save();
+          res.status(201).json(userSign);
+        });
       } else {
         res.status(403).json({ error: '用户已存在' });
       }
@@ -45,22 +51,30 @@ router.post(
     const { username, password } = req.body;
     User.findOne({ username }, (err, user) => {
       if (err) throw err;
-      if (user !== null && user.password === password) {
-        // 签发JWT令牌
-        const token = jwt.sign(
-          {
-            username: user.username,
-            id: user.id,
-          },
-          JWT_SECRET,
-          {
-            expiresIn: '10 days',
+      if (user) {
+        bcrypt.compare(password, user.password, function (err, result) {
+          if (err) throw err;
+          if (result) {
+            // 签发JWT令牌
+            const token = jwt.sign(
+              {
+                username: user.username,
+                id: user.id,
+              },
+              JWT_SECRET,
+              {
+                expiresIn: '10 days',
+              }
+            );
+            res.json({ user, token });
+          } else {
+            // 认证失败
+            res.status(401).json({ error: '密码错误' });
           }
-        );
-        res.json({ user, token });
+        });
       } else {
-        // 认证失败
-        res.status(401).json({ error: '认证失败' });
+        // 用户不存在
+        res.status(401).json({ error: '用户不存在' });
       }
     });
   }

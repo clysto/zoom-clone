@@ -6,8 +6,8 @@ Web:
 SocketIO:
     ✔ 搭建基础SocketIO服务器 @done(20-09-28 14:11)
     ✔ 解决Socket权限验证问题 @done(20-09-28 16:30)
-    ☐ 搭建房间系统
-    ☐ 构建session系统
+    ✘ 搭建房间系统 @cancelled(20-10-02 22:24)
+    ✘ 构建session系统 @cancelled(20-10-02 22:24)
 RTC:
-    ☐ 七牛云RTC签发token服务
+    ✔ 七牛云RTC签发token服务 @done(20-10-02 22:23)
     

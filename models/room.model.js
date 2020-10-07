@@ -1,13 +1,23 @@
 const mongoose = require('mongoose');
 
-const Room = mongoose.model(
-  'Room',
-  new mongoose.Schema({
+const roomSchema = new mongoose.Schema(
+  {
     subject: String,
     expireAt: Date,
-    creator: mongoose.ObjectId,
+    creator: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
     createdDate: Date,
-  })
+  },
+  {
+    toObject: { virtuals: true },
+    toJSON: { virtuals: true },
+  }
 );
 
-module.exports = Room;
+roomSchema.virtual('closed').get(function () {
+  return this.expireAt < new Date();
+});
+
+module.exports = mongoose.model('Room', roomSchema);
