@@ -3,14 +3,6 @@ const router = require('express').Router();
 const { body, validationResult, param } = require('express-validator');
 const Room = require('../models/room.model');
 const { genRoomToken } = require('../qiniu/rtc');
-const mongoose = require('mongoose');
-
-function objectIdValidator(value) {
-  if (!mongoose.Types.ObjectId.isValid(value)) {
-    throw new Error('Invalid Mongodb ObjectId');
-  }
-  return true;
-}
 
 router.post('/rooms', auth, [body('subject').notEmpty()], (req, res) => {
   const errors = validationResult(req);
@@ -28,7 +20,7 @@ router.post('/rooms', auth, [body('subject').notEmpty()], (req, res) => {
   res.status(201).json(room);
 });
 
-router.get('/rooms/:id', param('id').custom(objectIdValidator), (req, res) => {
+router.get('/rooms/:id', param('id').isMongoId(), (req, res) => {
   const errors = validationResult(req);
   // 验证body
   if (!errors.isEmpty()) {
@@ -48,20 +40,24 @@ router.get('/rooms/:id', param('id').custom(objectIdValidator), (req, res) => {
   });
 });
 
-router.get(
-  '/rooms/:id/token',
-  param('id').custom(objectIdValidator),
-  auth,
-  (req, res) => {
-    const errors = validationResult(req);
-    // 验证body
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.mapped() });
-    }
-    const roomId = req.params.id;
-    const userId = req.user.id;
-    Room.findById(roomId, (err, room) => {
+router.get('/rooms/:id/token', param('id').isMongoId(), auth, (req, res) => {
+  const errors = validationResult(req);
+  // 验证body
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.mapped() });
+  }
+  const roomId = req.params.id;
+  const userId = req.user.id;
+  Room.findById(roomId)
+    .populate('creator')
+    .exec((err, room) => {
       if (err) throw err;
+
+      if (room.closed) {
+        res.status(404).json({
+          error: `id为${roomId}的会议室房间已经结束`,
+        });
+      }
 
       if (room) {
         const expireAt = new Date(Date.now() + 1 * 3600 * 24 * 1000);
@@ -75,13 +71,38 @@ router.get(
         });
       }
     });
-  }
-);
+});
 
 router.get('/rooms', auth, (req, res) => {
-  Room.find({ creator: req.user.id }, (err, rooms) => {
+  Room.find({ creator: req.user.id })
+    .sort({ createdDate: -1 })
+    .exec((err, rooms) => {
+      if (err) throw err;
+      res.json(rooms);
+    });
+});
+
+router.delete('/rooms/:id', param('id').isMongoId(), auth, (req, res) => {
+  const errors = validationResult(req);
+  // 验证body
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.mapped() });
+  }
+  Room.deleteOne({ creator: req.user.id, _id: req.params.id }, (err) => {
     if (err) throw err;
-    res.json(rooms);
+    res.sendStatus(204);
+  });
+});
+
+router.put('/rooms/:id/closed', param('id').isMongoId(), auth, (req, res) => {
+  Room.findOne({ _id: req.params.id, creator: req.user.id }, (_, room) => {
+    if (room) {
+      room.expireAt = new Date();
+      room.save();
+      const roomJson = room.toJSON();
+      roomJson.closed = true;
+      res.json(roomJson);
+    }
   });
 });
 
