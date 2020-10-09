@@ -53,21 +53,19 @@ router.get('/rooms/:id/token', param('id').isMongoId(), auth, (req, res) => {
     .exec((err, room) => {
       if (err) throw err;
 
-      if (room.closed) {
-        res.status(404).json({
-          error: `id为${roomId}的会议室房间已经结束`,
-        });
-      }
-
-      if (room) {
+      if (room && !room.closed) {
         const expireAt = new Date(Date.now() + 1 * 3600 * 24 * 1000);
         const token = genRoomToken(roomId, userId, expireAt);
         room = room.toJSON();
         room.token = token;
         res.json(room);
-      } else {
+      } else if (!room) {
         res.status(404).json({
           error: `没有找到id为${roomId}的会议室房间`,
+        });
+      } else {
+        res.status(404).json({
+          error: `id为${roomId}的会议室房间已经结束`,
         });
       }
     });
