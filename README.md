@@ -44,6 +44,11 @@ DB_PWD=<数据库密码>
 DB_URL=<数据库URL>
 DB_NAME=<数据库名称>
 PORT=<HTTP端口>
+JWT_SECRET=<JWT加密>
+QINIU_AK=<七牛云AccessKey>
+QINIU_SK=<七牛云SecretKey>
+QINIU_RTC_APPID=<七牛RTC APPID>
+BCRYPT_SALT_ROUNDS=<bcrypt计算强度>
 ```
 
 ### 运行
