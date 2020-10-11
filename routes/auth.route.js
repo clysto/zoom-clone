@@ -30,6 +30,7 @@ router.post(
           if (err) throw err;
           userSign.password = hash;
           userSign.save();
+          userSign.password = undefined;
           res.status(201).json(userSign);
         });
       } else {
@@ -66,6 +67,7 @@ router.post(
                 expiresIn: '10 days',
               }
             );
+            user.password = undefined;
             res.json({ user, token });
           } else {
             // 认证失败
