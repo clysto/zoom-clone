@@ -30,7 +30,6 @@ router.post(
           if (err) throw err;
           userSign.password = hash;
           userSign.save();
-          userSign.password = undefined;
           res.status(201).json(userSign);
         });
       } else {
